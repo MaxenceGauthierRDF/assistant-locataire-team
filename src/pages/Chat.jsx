@@ -24,7 +24,7 @@ export default function Chat({ email }) {
         body: JSON.stringify({
           model: 'gpt-4.1-nano',
           messages: [
-            { role: 'system', content: 'Du bist ein intelligenter Mieterassistent, der auf der Grundlage der Dokumente, die du hast, antwortet. Du antwortest in der Sprache, in der dir die Frage gestellt wird.' },
+            { role: 'system', content: 'Du bist ein intelligenter Mieterassistent, der auf der Grundlage der Dokumente, die du hast, antwortet.' },
             // **On envoie d’abord tous les docs OCR**
             { role: 'system', content: `Hier sind die Dokumente des Mieters:\n${context}` },
             // puis tout l’historique

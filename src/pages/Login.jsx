@@ -1,25 +1,31 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
+    setLoading(true);
+    setError('');
     try {
-      const res = await fetch(`/api?mode=auth&email=${email}&password=${password}`);
+      const res = await fetch(
+        `/api?mode=auth&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+      );
       const data = await res.json();
       if (data.success) {
         onLogin(email);
       } else {
-        setError("❌ Email ou mot de passe incorrect");
+        setError('❌ Email ou mot de passe incorrect');
       }
-    } catch (err) {
-      setError("❌ Erreur réseau");
+    } catch {
+      setError('❌ Erreur réseau');
+    } finally {
+      setLoading(false);
     }
   }
-  
+
   return (
     <form
       onSubmit={e => {
@@ -37,6 +43,7 @@ export default function Login({ onLogin }) {
           className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white placeholder-gray-400"
           value={email}
           onChange={e => setEmail(e.target.value)}
+          disabled={loading}
         />
 
         <input
@@ -45,6 +52,7 @@ export default function Login({ onLogin }) {
           className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white placeholder-gray-400"
           value={password}
           onChange={e => setPassword(e.target.value)}
+          disabled={loading}
           onKeyDown={e => {
             if (e.key === 'Enter') {
               e.preventDefault();
@@ -57,9 +65,12 @@ export default function Login({ onLogin }) {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-500 transition-colors p-3 rounded-md font-medium"
+          disabled={loading}
+          className={`w-full p-3 rounded-md font-medium transition-colors ${
+            loading ? 'bg-gray-600' : 'bg-blue-600 hover:bg-blue-500'
+          }`}
         >
-          Se connecter
+          {loading ? 'Connexion…' : 'Se connecter'}
         </button>
       </div>
     </form>
