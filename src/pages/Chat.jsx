@@ -32,7 +32,7 @@ export default function Chat({ email, onLogout }) {
           'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_KEY}`
         },
         body: JSON.stringify({
-          model: import.meta.env.VITE_OPENAI_MODEL,
+          model: 'gpt-4.1-nano',
           messages
         })
       });
