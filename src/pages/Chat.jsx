@@ -18,8 +18,8 @@ export default function Chat({ email, onLogout }) {
 
       // 2. Prépare les messages pour l'appel OpenAI
       const messages = [
-        { role: 'system', content: 'Tu es un assistant locataire intelligent. Tu répondras toujours dans la langue de la question.' },
-        { role: 'user', content: `Contexte (documents du locataire) :\n${context}` },
+        { role: 'system', content: 'Du bist ein intelligenter Mieterassistent, der auf der Grundlage der Dokumente, die du hast, antwortet.' },
+        { role: 'user', content: `Hier sind die Dokumente des Mieters :\n${context}` },
         ...history,
         { role: 'user', content: question }
       ];
