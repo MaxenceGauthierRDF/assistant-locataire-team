@@ -25,7 +25,7 @@ export default function Chat({ email }) {
           'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_KEY}`,  // ← ici la virgule
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
+          model: 'gpt-4.1-nano',
           messages: [
             { role: 'system', content: 'Tu es un assistant locataire intelligent.' },
             { role: 'user', content: `Voici les documents du locataire:\n${context}\n\nQuestion: ${question}` }
