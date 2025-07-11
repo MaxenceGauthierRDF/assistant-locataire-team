@@ -8,10 +8,7 @@
     }
   ],
   "routes": [
-    // 1. D’abord, laisse passer tous les fichiers physiques (CSS, JS, images…)
     { "handle": "filesystem" },
-
-    // 2. Tout le reste (routes SPA) pointe sur index.html
     { "src": "/.*", "dest": "/index.html" }
   ]
 }
