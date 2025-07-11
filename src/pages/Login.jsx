@@ -21,14 +21,20 @@ export default function Login({ onLogin }) {
   }
   
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 px-4">
-      <div className="bg-gray-850 p-10 rounded-2xl shadow-xl w-full max-w-sm border border-gray-700">
-        <h2 className="text-3xl font-semibold mb-6 text-center text-white">Assistant Locataire</h2>
+    <form
+      onSubmit={e => {
+        e.preventDefault();
+        handleLogin();
+      }}
+      className="min-h-screen bg-gray-900 flex items-center justify-center text-white px-4"
+    >
+      <div className="bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-md">
+        <h2 className="text-2xl font-semibold mb-6 text-center">Assistant Locataire</h2>
 
         <input
           type="email"
           placeholder="Email"
-          className="w-full p-3 mb-4 rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white placeholder-gray-400"
           value={email}
           onChange={e => setEmail(e.target.value)}
         />
@@ -36,20 +42,26 @@ export default function Login({ onLogin }) {
         <input
           type="password"
           placeholder="Mot de passe"
-          className="w-full p-3 mb-4 rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white placeholder-gray-400"
           value={password}
           onChange={e => setPassword(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleLogin();
+            }
+          }}
         />
 
         {error && <div className="text-red-400 text-sm mb-4">{error}</div>}
 
         <button
-          onClick={handleLogin}
-          className="w-full bg-blue-600 hover:bg-blue-500 transition-all p-3 rounded-lg font-medium text-white"
+          type="submit"
+          className="w-full bg-blue-600 hover:bg-blue-500 transition-colors p-3 rounded-md font-medium"
         >
           Se connecter
         </button>
       </div>
-    </div>
+    </form>
   );
 }
