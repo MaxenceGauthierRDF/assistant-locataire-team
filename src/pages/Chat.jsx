@@ -1,53 +1,57 @@
+// Nouvelle version corrigée de Chat.jsx
 import React, { useState } from 'react';
 import logo from '../assets/logo.png';
 
-export default function Chat({ email }) {
+export default function Chat({ email, onLogout }) {
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState([]);
 
   async function ask() {
+    if (!question.trim()) return;
     setLoading(true);
     try {
-      // 1) Récupère le contexte texte
-      const r = await fetch(`/api?mode=text&email=${email}`);
+      // 1. Récupère le contexte texte
+      const r = await fetch(`/api?mode=text&email=${encodeURIComponent(email)}`);
       const data = await r.json();
       const context = data.text;
 
-      // 2) Appel OpenAI
+      // 2. Prépare les messages pour l'appel OpenAI
+      const messages = [
+        { role: 'system', content: 'Tu es un assistant locataire intelligent. Tu répondras toujours dans la langue de la question.' },
+        { role: 'user', content: `Contexte (documents du locataire) :\n${context}` },
+        ...history,
+        { role: 'user', content: question }
+      ];
+
+      // 3. Appel OpenAI
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_KEY}`,
+          'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_KEY}`
         },
         body: JSON.stringify({
-          model: 'gpt-4.1-nano',
-          messages: [
-            { role: 'system', content: 'Du bist ein intelligenter Mieterassistent. Du antwortest in die Sprache der Frage' },
-            // **On envoie d’abord tous les docs OCR**
-            { role: 'system', content: `Hier sind die Dokumente des Mieters:\n${context}` },
-            // puis tout l’historique
-            ...history,
-            // et enfin la nouvelle question
-          ]
+          model: import.meta.env.VITE_OPENAI_MODEL,
+          messages
         })
       });
 
       const result = await res.json();
-      let assistantReply;
-      if (result.error) {
-        assistantReply = `❌ OpenAI Error: ${result.error.message}`;
-      } else {
-        assistantReply = result.choices?.[0]?.message?.content || '❌ Réponse vide';
-      }
+      const assistantReply = result.error
+        ? `❌ OpenAI Error: ${result.error.message}`
+        : result.choices?.[0]?.message?.content || '❌ Réponse vide';
 
-      // 3) Met à jour l'historique
-      setHistory(prev => [
-        ...prev,
-        { role: 'user', content: question },
-        { role: 'assistant', content: assistantReply }
-      ]);
+      // 4. Met à jour l'historique et limite à 20 messages
+      setHistory(prev => {
+        const updated = [
+          ...prev,
+          { role: 'user', content: question },
+          { role: 'assistant', content: assistantReply }
+        ];
+        return updated.slice(-20);
+      });
+
     } catch (err) {
       setHistory(prev => [
         ...prev,
@@ -55,7 +59,6 @@ export default function Chat({ email }) {
         { role: 'assistant', content: '❌ Erreur réseau' }
       ]);
     } finally {
-      // 4) Vide le prompt et stoppe le loader
       setQuestion('');
       setLoading(false);
     }
@@ -63,17 +66,23 @@ export default function Chat({ email }) {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-8 flex flex-col items-center">
+      {/* Header avec logo et titre */}
       <header className="mb-10 text-center">
         <img src={logo} alt="Logo" className="h-16 mx-auto mb-4" />
-        <h1 className="text-2xl sm:text-3xl font-semibold tracking-wide text-white/90">
-          Redefine Property Management Portal
-        </h1>
-        <p className="text-sm text-white/60 mt-1 max-w-xl mx-auto leading-relaxed text-center">
-          Bienvenue. Posez votre question, un chatbot intelligent vous répondra avec précision.<br />
-          Si vos questions ne trouvent pas réponse, sélectionnez XXX et la demande sera directement transmise à votre property manager compétent.
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-wide text-white/90">
+            Redefine Property Management Portal
+          </h1>
+          <button onClick={onLogout} className="text-sm text-gray-300 hover:underline">
+            Déconnexion
+          </button>
+        </div>
+        <p className="text-sm text-white/60 max-w-xl mx-auto leading-relaxed">
+          Bienvenue {email}. Posez votre question ci-dessous ; un chatbot intelligent vous répondra.
         </p>
       </header>
 
+      {/* Zone de chat */}
       <div className="bg-gray-800 p-6 rounded-2xl shadow-lg w-full max-w-2xl">
         <form
           onSubmit={e => {
@@ -107,9 +116,10 @@ export default function Chat({ email }) {
           </button>
         </form>
 
+        {/* Affichage de l'historique des messages */}
         <div className="my-6 space-y-4 max-h-80 overflow-y-auto pr-2">
-          {history.map((msg, i) => (
-            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+          {history.map((msg, index) => (
+            <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[75%] p-3 rounded-lg shadow-md ${
                 msg.role === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-white'
               }`}>
