@@ -7,17 +7,15 @@ export default function Chat({ tenantId, onLogout }) {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState([]);
 
-  // 1️⃣ Charger l'historique depuis localStorage
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY(tenantId));
     if (saved) {
       try {
         setHistory(JSON.parse(saved));
-      } catch {}
+      } catch {};
     }
   }, [tenantId]);
 
-  // 2️⃣ Persister l'historique à chaque mise à jour
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY(tenantId), JSON.stringify(history));
   }, [history, tenantId]);
@@ -34,13 +32,12 @@ export default function Chat({ tenantId, onLogout }) {
       const { answer, error } = await res.json();
       const assistantReply = error ? `❌ ${error}` : answer;
 
-      // 3️⃣ Mettre à jour l'historique
       setHistory(prev => {
         const updated = [
           ...prev,
           { user: question, bot: assistantReply, timestamp: Date.now() }
         ];
-        return updated.slice(-20); // conserve 20 derniers
+        return updated.slice(-20);
       });
 
     } catch {
@@ -54,25 +51,44 @@ export default function Chat({ tenantId, onLogout }) {
     }
   }
 
+  const previous = history.slice(0, -1);
+  const latest = history[history.length - 1];
+
   return (
     <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-8 flex flex-col items-center">
-      {/* Historique rapide */}
-      {history.length > 0 && (
-        <section className="w-full max-w-2xl mb-6 bg-gray-800 p-4 rounded-lg">
-          <h2 className="text-lg font-medium mb-2">Historique rapide</h2>
-          <ul className="space-y-2 max-h-40 overflow-y-auto pr-2">
-            {history.map((entry, i) => (
-              <li key={i} className="text-sm">
-                <span className="font-semibold">👤 {entry.user}</span><br/>
-                <span className="font-medium">🤖 {entry.bot}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <header className="mb-6 text-center w-full max-w-2xl">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-wide text-white/90">
+            Portail Équipe
+          </h1>
+          <button onClick={onLogout} className="text-sm text-gray-300 hover:underline">
+            Déconnexion
+          </button>
+        </div>
+      </header>
 
-      {/* Zone de chat */}
       <div className="bg-gray-800 p-6 rounded-2xl shadow-lg w-full max-w-2xl flex flex-col">
+        {/* Ancienne histoire (tout sauf le dernier) */}
+        {previous.length > 0 && (
+          <div className="mb-4 space-y-4 max-h-40 overflow-y-auto pr-2">
+            {previous.map((entry, i) => (
+              <div key={i}>
+                <div className="flex justify-end">
+                  <div className="bg-blue-600 text-white p-2 rounded-2xl max-w-[75%]">
+                    {entry.user}
+                  </div>
+                </div>
+                <div className="flex justify-start">
+                  <div className="bg-gray-700 text-white p-2 rounded-2xl max-w-[75%]">
+                    {entry.bot}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Formulaire */}
         <form
           onSubmit={e => { e.preventDefault(); ask(); }}
           className="flex flex-col"
@@ -90,7 +106,6 @@ export default function Chat({ tenantId, onLogout }) {
             rows={4}
             className="w-full p-4 rounded-md bg-gray-700 text-white placeholder-gray-400 resize-none"
           />
-
           <button
             type="submit"
             disabled={loading || !question.trim()}
@@ -101,6 +116,22 @@ export default function Chat({ tenantId, onLogout }) {
             {loading ? 'Chargement...' : 'Envoyer'}
           </button>
         </form>
+
+        {/* Dernière réponse juste en dessous */}
+        {latest && (
+          <div className="mt-4 space-y-4">
+            <div className="flex justify-end">
+              <div className="bg-blue-600 text-white p-2 rounded-2xl max-w-[75%]">
+                {latest.user}
+              </div>
+            </div>
+            <div className="flex justify-start">
+              <div className="bg-gray-700 text-white p-2 rounded-2xl max-w-[75%]">
+                {latest.bot}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
