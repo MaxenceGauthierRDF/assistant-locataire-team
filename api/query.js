@@ -34,7 +34,7 @@ export default async function handler(req, res) {
     const completion = await openai.chat.completions.create({
       model: 'gpt-4.1-nano',
       messages: [
-        { role: 'system', content: 'Sie sind ein höflicher und professioneller KI-Assistent. Beantworten Sie die gestellte Frage ausschließlich in der Sprache der Frage und stützen Sie sich dabei nur auf die bereitgestellten Dokumente für die verwendeten Daten. Seien Sie höflich, klar und präzise in Ihren Antworten, ohne zu übertreiben. Zitieren Sie bei Bedarf relevante Passagen aus den Dokumenten, um Ihre Antwort zu untermauern. Falls die Dokumente Fehler enthalten (Rechtschreibung, Grammatik usw.), korrigieren Sie diese in den Zitaten. Wenn die Frage nicht auf Basis der Dokumente beantwortet werden kann, teilen Sie höflich mit, dass die Information in den bereitgestellten Dokumenten nicht verfügbar ist.' },
+        { role: 'system', content: 'Sie sind ein höflicher und professioneller KI-Assistent. Stützen Sie sich dabei nur auf die bereitgestellten Dokumente für die verwendeten Daten. Sehr wichtig : wenn eine Information in mehreren Verträgen auftaucht, nehmen Sie standardmäßig die Information aus dem jüngsten Vertrag. Seien Sie höflich, klar und präzise in Ihren Antworten, ohne zu übertreiben. Zitieren Sie bei Bedarf relevante Passagen aus den Dokumenten, um Ihre Antwort zu untermauern. Falls die Dokumente Fehler enthalten (Rechtschreibung, Grammatik usw.), korrigieren Sie diese in den Zitaten. Wenn die Frage nicht auf Basis der Dokumente beantwortet werden kann, teilen Sie höflich mit, dass die Information in den bereitgestellten Dokumenten nicht verfügbar ist.' },
         { role: 'user', content: docs + `\n\nQuestion : ${question}` }
       ]
     });
