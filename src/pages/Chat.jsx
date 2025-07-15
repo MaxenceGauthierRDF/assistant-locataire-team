@@ -1,42 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+const STORAGE_KEY = (tenantId) => `chat_history_${tenantId}`;
 
 export default function Chat({ tenantId, onLogout }) {
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState([]);
 
+  // 1️⃣ Charger l'historique depuis localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY(tenantId));
+    if (saved) {
+      try {
+        setHistory(JSON.parse(saved));
+      } catch {}
+    }
+  }, [tenantId]);
+
+  // 2️⃣ Persister l'historique à chaque mise à jour
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY(tenantId), JSON.stringify(history));
+  }, [history, tenantId]);
+
   async function ask() {
     if (!question.trim()) return;
     setLoading(true);
     try {
-      // 1. Appel à ton nouvel endpoint /api/query
-      const response = await fetch('/api/query', {
+      const res = await fetch('/api/query', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tenantId,
-          question,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantId, question })
       });
-      const result = await response.json();
-      const assistantReply = result.answer || '❌ Pas de réponse';
+      const { answer, error } = await res.json();
+      const assistantReply = error ? `❌ ${error}` : answer;
 
-      // 2. Mise à jour de l'historique (max 20 messages)
+      // 3️⃣ Mettre à jour l'historique
       setHistory(prev => {
         const updated = [
           ...prev,
-          { role: 'user', content: question },
-          { role: 'assistant', content: assistantReply },
+          { user: question, bot: assistantReply, timestamp: Date.now() }
         ];
-        return updated.slice(-20);
+        return updated.slice(-20); // conserve 20 derniers
       });
-    } catch (err) {
+
+    } catch {
       setHistory(prev => [
         ...prev,
-        { role: 'user', content: question },
-        { role: 'assistant', content: '❌ Erreur réseau' },
+        { user: question, bot: '❌ Erreur réseau', timestamp: Date.now() }
       ]);
     } finally {
       setQuestion('');
@@ -46,23 +56,25 @@ export default function Chat({ tenantId, onLogout }) {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-8 flex flex-col items-center">
-      <header className="mb-10 text-center w-full max-w-2xl">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-semibold tracking-wide text-white/90">
-            Portail Équipe
-          </h1>
-          <button onClick={onLogout} className="text-sm text-gray-300 hover:underline">
-            Déconnexion
-          </button>
-        </div>
-      </header>
+      {/* Historique rapide */}
+      {history.length > 0 && (
+        <section className="w-full max-w-2xl mb-6 bg-gray-800 p-4 rounded-lg">
+          <h2 className="text-lg font-medium mb-2">Historique rapide</h2>
+          <ul className="space-y-2 max-h-40 overflow-y-auto pr-2">
+            {history.map((entry, i) => (
+              <li key={i} className="text-sm">
+                <span className="font-semibold">👤 {entry.user}</span><br/>
+                <span className="font-medium">🤖 {entry.bot}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
-      <div className="bg-gray-800 p-6 rounded-2xl shadow-lg w-full max-w-2xl">
+      {/* Zone de chat */}
+      <div className="bg-gray-800 p-6 rounded-2xl shadow-lg w-full max-w-2xl flex flex-col">
         <form
-          onSubmit={e => {
-            e.preventDefault();
-            ask();
-          }}
+          onSubmit={e => { e.preventDefault(); ask(); }}
           className="flex flex-col"
         >
           <textarea
@@ -89,21 +101,6 @@ export default function Chat({ tenantId, onLogout }) {
             {loading ? 'Chargement...' : 'Envoyer'}
           </button>
         </form>
-
-        <div className="my-6 space-y-4 max-h-80 overflow-y-auto pr-2">
-          {history.map((msg, index) => (
-            <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[75%] p-3 rounded-lg shadow-md ${
-                msg.role === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-white'
-              }`}>
-                <p className="text-sm">{msg.content}</p>
-                <span className="block text-xs mt-1 opacity-50">
-                  {msg.role === 'user' ? '👤 Vous' : '🤖 Assistant'}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
