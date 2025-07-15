@@ -48,8 +48,8 @@ export default function Chat({ tenantId, onLogout }) {
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
       <header className="bg-gray-800 p-4">
         <div className="max-w-xl mx-auto flex justify-between items-center">
-          <h1 className="text-lg font-medium">Portail Équipe</h1>
-          <button onClick={onLogout} className="text-sm hover:underline">Déconnexion</button>
+          <h1 className="text-lg font-medium">Team-Portal</h1>
+          <button onClick={onLogout} className="text-sm hover:underline">Abmelden</button>
         </div>
       </header>
 
@@ -73,7 +73,7 @@ export default function Chat({ tenantId, onLogout }) {
             <textarea
               rows={2}
               className="w-full p-2 rounded bg-gray-800 text-white resize-none"
-              placeholder="Pose ta question..."
+              placeholder="Stellen Sie Ihre Frage..."
               value={question}
               onChange={e => setQuestion(e.target.value)}
               onKeyDown={e => {
@@ -89,7 +89,7 @@ export default function Chat({ tenantId, onLogout }) {
               disabled={loading || !question.trim()}
               className="mt-2 w-full py-2 bg-blue-600 rounded disabled:opacity-50"
             >
-              {loading ? '...' : 'Envoyer'}
+              {loading ? '...' : 'Schicken'}
             </button>
           </form>
         </div>
