@@ -11,14 +11,14 @@ export function UserPicker({ onSelect }) {
   }, []);
 
   return (
-    <div className="max-w-lg mx-auto space-y-4 p-4">
-      <h2 className="text-xl font-medium text-gray-200">Choisissez un utilisateur</h2>
+    <div className="max-w-lg mx-auto p-4 bg-blue-900 rounded-lg">
+      <h2 className="text-xl font-medium text-gray-200 mb-4">Choisissez un utilisateur</h2>
       <div className="grid grid-cols-2 gap-3">
         {users.map(u => (
           <button
             key={u.id}
             onClick={() => onSelect(u.id)}
-            className="py-2 px-3 bg-slate-600 text-white rounded-md text-sm hover:bg-slate-500 transition"
+            className="py-2 px-3 bg-gray-700 text-white rounded-md text-sm hover:bg-gray-600 transition"
           >
             {u.name}
           </button>
