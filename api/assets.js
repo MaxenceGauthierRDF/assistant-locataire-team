@@ -7,7 +7,7 @@ export default async function handler(req, res) {
 
     const { data, error } = await supabase
       .from('assets')
-      .select('id,asset_id')
+      .select('id,code')
       .eq('user_id', userId);
 
     if (error) throw error;
