@@ -44,12 +44,22 @@ export default function Chat({ tenantId, onLogout }) {
     setLoading(false);
   };
 
+  const clearHistory = () => {
+    setHistory([]);
+    localStorage.removeItem(STORAGE_KEY(tenantId));
+  };
+
   return (
-    <div className="flex flex-col min-h-screen bg-gray-900 text-white">
-      <header className="bg-gray-800 p-4">
-        <div className="max-w-xl mx-auto flex justify-between items-center">
-          <h1 className="text-lg font-medium">Team-Portal</h1>
-          <button onClick={onLogout} className="text-sm hover:underline">Abmelden</button>
+    <div className="flex flex-col min-h-screen bg-gray-700 text-white">
+      <header className="bg-gray-800 p-4 flex justify-between items-center">
+        <h1 className="text-lg font-medium">Team-Portal</h1>
+        <div className="space-x-2">
+          <button onClick={clearHistory} className="text-sm bg-gray-600 px-2 py-1 rounded hover:bg-gray-500 transition">
+            Verlauf löschen
+          </button>
+          <button onClick={onLogout} className="text-sm bg-gray-600 px-2 py-1 rounded hover:bg-gray-500 transition">
+            Abmelden
+          </button>
         </div>
       </header>
 
@@ -76,18 +86,13 @@ export default function Chat({ tenantId, onLogout }) {
               placeholder="Stellen Sie Ihre Frage..."
               value={question}
               onChange={e => setQuestion(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleAsk();
-                }
-              }}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAsk(); } }}
               disabled={loading}
             />
             <button
               type="submit"
               disabled={loading || !question.trim()}
-              className="mt-2 w-full py-2 bg-blue-600 rounded disabled:opacity-50"
+              className="mt-2 w-full py-2 bg-blue-600 rounded disabled:opacity-50 hover:bg-blue-500 transition"
             >
               {loading ? '...' : 'Schicken'}
             </button>
