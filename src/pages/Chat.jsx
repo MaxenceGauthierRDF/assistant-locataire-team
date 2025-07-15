@@ -76,6 +76,12 @@ export default function Chat({ tenantId, onLogout }) {
               placeholder="Pose ta question..."
               value={question}
               onChange={e => setQuestion(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleAsk();
+                }
+              }}
               disabled={loading}
             />
             <button
