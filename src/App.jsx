@@ -1,17 +1,22 @@
-import React, { useState } from 'react';
-import Login from './pages/Login.jsx';
-import Chat from './pages/Chat.jsx';
+import React from 'react';
+import { UserPicker } from './components/UserPicker';
+import { AssetPicker } from './components/AssetPicker';
+import { TenantPicker } from './components/TenantPicker';
+import { Chat } from './pages/Chat';
 
-export default function App() {
-  const [email, setEmail] = useState('');
+function App() {
+  const [user, setUser] = React.useState(null);
+  const [asset, setAsset] = React.useState(null);
+  const [tenant, setTenant] = React.useState(null);
 
   return (
-    <>
-      {email ? (
-        <Chat email={email} />
-      ) : (
-        <Login onLogin={setEmail} />
-      )}
-    </>
+    <div className="min-h-screen p-4 bg-gray-50">
+      {!user && <UserPicker onSelect={setUser} />}
+      {user && !asset && <AssetPicker userId={user} onSelect={setAsset} />}
+      {asset && !tenant && <TenantPicker assetId={asset} onSelect={setTenant} />}
+      {tenant && <Chat tenantId={tenant} />}
+    </div>
   );
 }
+
+export default App;
