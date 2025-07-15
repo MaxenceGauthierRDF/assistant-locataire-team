@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const STORAGE_KEY = (tenantId) => `chat_history_${tenantId}`;
+const MAX_HISTORY = 20;
 
 export default function Chat({ tenantId, onLogout }) {
   const [question, setQuestion] = useState('');
@@ -12,7 +13,9 @@ export default function Chat({ tenantId, onLogout }) {
     if (saved) {
       try {
         setHistory(JSON.parse(saved));
-      } catch {};
+      } catch {
+        console.error('Failed to parse history');
+      }
     }
   }, [tenantId]);
 
@@ -27,24 +30,18 @@ export default function Chat({ tenantId, onLogout }) {
       const res = await fetch('/api/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenantId, question })
+        body: JSON.stringify({ tenantId, question }),
       });
       const { answer, error } = await res.json();
       const assistantReply = error ? `❌ ${error}` : answer;
 
       setHistory(prev => {
-        const updated = [
-          ...prev,
-          { user: question, bot: assistantReply, timestamp: Date.now() }
-        ];
-        return updated.slice(-20);
+        const updated = [...prev, { user: question, bot: assistantReply, timestamp: Date.now() }];
+        return updated.slice(-MAX_HISTORY);
       });
-
-    } catch {
-      setHistory(prev => [
-        ...prev,
-        { user: question, bot: '❌ Erreur réseau', timestamp: Date.now() }
-      ]);
+    } catch (err) {
+      console.error('Ask error:', err);
+      setHistory(prev => [...prev, { user: question, bot: '❌ Erreur réseau', timestamp: Date.now() }]);
     } finally {
       setQuestion('');
       setLoading(false);
@@ -55,84 +52,68 @@ export default function Chat({ tenantId, onLogout }) {
   const latest = history[history.length - 1];
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-8 flex flex-col items-center">
-      <header className="mb-6 text-center w-full max-w-2xl">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl sm:text-3xl font-semibold tracking-wide text-white/90">
-            Portail Équipe
-          </h1>
-          <button onClick={onLogout} className="text-sm text-gray-300 hover:underline">
-            Déconnexion
-          </button>
-        </div>
+    <div className="flex flex-col h-screen bg-gray-900 text-white">
+      {/* Header */}
+      <header className="flex-none p-4 bg-gray-800 flex justify-between items-center">
+        <h1 className="text-xl font-semibold">Portail Équipe</h1>
+        <button onClick={onLogout} className="text-sm text-gray-400 hover:underline">Déconnexion</button>
       </header>
 
-      <div className="bg-gray-800 p-6 rounded-2xl shadow-lg w-full max-w-2xl flex flex-col">
-        {/* Ancienne histoire (tout sauf le dernier) */}
-        {previous.length > 0 && (
-          <div className="mb-4 space-y-4 max-h-40 overflow-y-auto pr-2">
-            {previous.map((entry, i) => (
-              <div key={i}>
-                <div className="flex justify-end">
-                  <div className="bg-blue-600 text-white p-2 rounded-2xl max-w-[75%]">
-                    {entry.user}
-                  </div>
-                </div>
-                <div className="flex justify-start">
-                  <div className="bg-gray-700 text-white p-2 rounded-2xl max-w-[75%]">
-                    {entry.bot}
-                  </div>
+      {/* Main chat area */}
+      <main className="flex-1 flex flex-col p-4 overflow-hidden">
+        {/* History scrollable above */}
+        <div className="flex-1 overflow-y-auto mb-4 space-y-4 pr-2">
+          {previous.map((entry, index) => (
+            <div key={index}>
+              <div className="flex justify-end">
+                <div className="bg-blue-600 text-white p-3 rounded-2xl max-w-[70%] shadow-md">
+                  {entry.user}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+              <div className="flex justify-start mt-1">
+                <div className="bg-gray-700 text-white p-3 rounded-2xl max-w-[70%] shadow-md">
+                  {entry.bot}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
 
-        {/* Formulaire */}
-        <form
-          onSubmit={e => { e.preventDefault(); ask(); }}
-          className="flex flex-col"
-        >
-          <textarea
-            placeholder="Pose ta question ici"
-            value={question}
-            onChange={e => setQuestion(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                ask();
-              }
-            }}
-            rows={4}
-            className="w-full p-4 rounded-md bg-gray-700 text-white placeholder-gray-400 resize-none"
-          />
-          <button
-            type="submit"
-            disabled={loading || !question.trim()}
-            className={`mt-4 w-full py-3 rounded-md font-medium transition-colors ${
-              loading ? 'bg-gray-600' : 'bg-blue-600 hover:bg-blue-500'
-            }`}
-          >
-            {loading ? 'Chargement...' : 'Envoyer'}
-          </button>
-        </form>
-
-        {/* Dernière réponse juste en dessous */}
+        {/* Latest exchange below history */}
         {latest && (
-          <div className="mt-4 space-y-4">
+          <div className="mb-4">
             <div className="flex justify-end">
-              <div className="bg-blue-600 text-white p-2 rounded-2xl max-w-[75%]">
+              <div className="bg-blue-600 text-white p-3 rounded-2xl max-w-[70%] shadow-md">
                 {latest.user}
               </div>
             </div>
-            <div className="flex justify-start">
-              <div className="bg-gray-700 text-white p-2 rounded-2xl max-w-[75%]">
+            <div className="flex justify-start mt-1">
+              <div className="bg-gray-700 text-white p-3 rounded-2xl max-w-[70%] shadow-md">
                 {latest.bot}
               </div>
             </div>
           </div>
         )}
-      </div>
+
+        {/* Input area */}
+        <form onSubmit={e => { e.preventDefault(); ask(); }} className="flex-none">
+          <textarea
+            rows={3}
+            className="w-full p-3 rounded-md bg-gray-800 text-white placeholder-gray-500 resize-none focus:outline-none focus:ring"
+            placeholder="Pose ta question ici"
+            value={question}
+            onChange={e => setQuestion(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(); } }}
+          />
+          <button
+            type="submit"
+            disabled={loading || !question.trim()}
+            className={`mt-2 w-full py-2 bg-blue-600 rounded-md font-medium transition ${loading ? 'opacity-50' : 'hover:bg-blue-500'}`}
+          >
+            {loading ? 'Chargement...' : 'Envoyer'}
+          </button>
+        </form>
+      </main>
     </div>
   );
 }
