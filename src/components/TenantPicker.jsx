@@ -12,14 +12,14 @@ export function TenantPicker({ assetId, onSelect }) {
   }, [assetId]);
 
   return (
-    <div className="space-y-2">
-      <h2 className="text-xl font-semibold">Sélectionne un locataire</h2>
-      <div className="grid grid-cols-3 gap-2">
+    <div className="max-w-lg mx-auto space-y-4 p-4">
+      <h2 className="text-xl font-medium text-gray-200">Choisissez un locataire</h2>
+      <div className="grid grid-cols-3 gap-3">
         {tenants.map(t => (
           <button
             key={t.id}
-            className="py-2 px-4 bg-purple-500 rounded-lg text-white hover:bg-purple-600"
             onClick={() => onSelect(t.id)}
+            className="py-2 px-3 bg-indigo-700 text-white rounded-md text-sm hover:bg-indigo-600 transition"
           >
             {t.name}
           </button>
