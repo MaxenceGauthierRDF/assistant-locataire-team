@@ -14,7 +14,7 @@ function App() {
       {!user && <UserPicker onSelect={setUser} />}
       {user && !asset && <AssetPicker userId={user} onSelect={setAsset} />}
       {asset && !tenant && <TenantPicker assetId={asset} onSelect={setTenant} />}
-      {tenant && <Chat tenantId={tenant} />}
+      { tenant && <Chat tenantId={tenant} onLogout={handleLogout} /> }
     </div>
   );
 }
