@@ -2,7 +2,7 @@ import React from 'react';
 import { UserPicker } from './components/UserPicker';
 import { AssetPicker } from './components/AssetPicker';
 import { TenantPicker } from './components/TenantPicker';
-import { Chat } from './pages/Chat';
+import Chat from './pages/Chat';
 
 function App() {
   const [user, setUser] = React.useState(null);
