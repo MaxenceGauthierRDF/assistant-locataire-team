@@ -1,27 +1,15 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
-    }
+    { "src": "api/users.js",   "use": "@vercel/node" },
+    { "src": "api/assets.js",  "use": "@vercel/node" },
+    { "src": "api/tenants.js", "use": "@vercel/node" },
+    { "src": "api/query.js",   "use": "@vercel/node" },
+    { "src": "package.json",   "use": "@vercel/static-build", "config": { "distDir": "dist" } }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1.js"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+    { "src": "/api/(.*)", "dest": "/api/$1.js" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)",     "dest": "/index.html" }
   ]
 }
