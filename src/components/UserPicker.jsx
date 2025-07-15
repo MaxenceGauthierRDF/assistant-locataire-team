@@ -11,9 +11,9 @@ export function UserPicker({ onSelect }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-700 flex items-center justify-center">
-      <div className="max-w-lg w-full p-6 bg-gray-800 rounded-lg">
-        <h2 className="text-xl font-medium text-gray-200 mb-4">Choisissez un utilisateur</h2>
+    <div className="min-h-screen bg-gray-800 flex items-center justify-center">
+      <div className="max-w-lg w-full p-6 bg-gray-800 rounded-lg space-y-4">
+        <h2 className="text-xl font-medium text-gray-200">Choisissez un utilisateur</h2>
         <div className="grid grid-cols-2 gap-3">
           {users.map(u => (
             <button

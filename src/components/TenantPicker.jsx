@@ -12,7 +12,7 @@ export function TenantPicker({ assetId, onSelect }) {
   }, [assetId]);
 
   return (
-    <div className="min-h-screen bg-gray-700 flex items-center justify-center">
+    <div className="min-h-screen bg-gray-800 flex items-center justify-center">
       <div className="max-w-lg w-full p-6 bg-gray-800 rounded-lg space-y-4">
         <h2 className="text-xl font-medium text-gray-200">Choisissez un locataire</h2>
         <div className="grid grid-cols-3 gap-3">
